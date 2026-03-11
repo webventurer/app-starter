@@ -24,6 +24,9 @@ pnpm add react-hook-form zod @hookform/resolvers
 
 # Icons + charts
 pnpm add lucide-react recharts
+
+# Animation
+pnpm add motion gsap
 ```
 
 ## Install: backend
@@ -64,10 +67,6 @@ pnpm add -D vitest @testing-library/react @testing-library/jest-dom jsdom
 ## Install: optional (add when needed)
 
 ```bash
-# Animation — only when CSS transitions aren't enough
-pnpm add motion        # interactive: mount/unmount, layout, gestures
-pnpm add gsap           # cinematic: timelines, scroll-driven, SVG morphing
-
 # State management — only when useState outgrows local state
 pnpm add zustand
 ```
