@@ -1,0 +1,12 @@
+
+# direnv
+!.envrc
+
+# codefu symlink
+codefu
+
+# codefu symlink
+.mcp.json
+
+# codefu symlink
+.semgrep
