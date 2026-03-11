@@ -1,120 +1,76 @@
 #!/bin/bash
 set -euo pipefail
 
-# Create a new starter app with all dependencies
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 STARTER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-APP_PATH="${1:-my-app}"
+TEMPLATES_DIR="$STARTER_DIR/templates"
 
-# Resolve to absolute path
-case "$APP_PATH" in
-    /*) ;;
-    *)  APP_PATH="$(pwd)/$APP_PATH" ;;
-esac
+TEMPLATE_FILES=(
+    vite.config.ts
+    tsconfig.app.json
+    tsconfig.json
+    drizzle.config.ts
+    vitest.config.ts
+    src/lib/query-client.ts
+    src/lib/db.ts
+    server/index.ts
+)
+
+DOC_FILES=(tech-spec.md stack.md)
+
+resolve_absolute_path() {
+    case "$1" in
+        /*) echo "$1" ;;
+        *)  echo "$(pwd)/$1" ;;
+    esac
+}
+
+APP_PATH="$(resolve_absolute_path "${1:-my-app}")"
 
 if [ -d "$APP_PATH" ]; then
     echo "Error: Directory '$APP_PATH' already exists"
     exit 1
 fi
 
-echo "Creating $APP_PATH..."
-
-# Scaffold Vite project (--no-interactive skips the framework menu)
-# Vite treats the directory arg as relative to cwd, so cd to parent first
-APP_DIR="$(dirname "$APP_PATH")"
-APP_BASE="$(basename "$APP_PATH")"
-(cd "$APP_DIR" && pnpm create vite@latest "$APP_BASE" --template react-ts --no-interactive)
-
-# Replace generated package.json with starter
-cp "$STARTER_DIR/package.json" "$APP_PATH/package.json"
-
-# Install all dependencies
-cd "$APP_PATH"
-pnpm install
-
-# Remove Vite's default ESLint config (we use Biome instead)
-rm -f eslint.config.js
-
-# Initialise Biome
-pnpx @biomejs/biome init
-
-# Configure Tailwind v4 + Vite plugin (required before shadcn init)
-cat > vite.config.ts << 'VITE'
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-});
-VITE
-
-# Add import alias to tsconfig
-cat > tsconfig.app.json << 'TSCONFIG'
-{
-  "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["src"]
+scaffold_vite_app() {
+    local app_dir="$(dirname "$APP_PATH")"
+    local app_base="$(basename "$APP_PATH")"
+    (cd "$app_dir" && pnpm create vite@latest "$app_base" --template react-ts --no-interactive)
 }
-TSCONFIG
 
-# Add import alias to tsconfig.json (shadcn reads this file directly)
-cat > tsconfig.json << 'ROOTTSCONFIG'
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+install_dependencies() {
+    cp "$STARTER_DIR/package.json" "$APP_PATH/package.json"
+    cd "$APP_PATH"
+    pnpm install
 }
-ROOTTSCONFIG
 
-# Add Tailwind CSS import to main stylesheet
-echo '@import "tailwindcss";' > src/index.css
+copy_templates() {
+    for file in "${TEMPLATE_FILES[@]}"; do
+        mkdir -p "$(dirname "$file")"
+        cp "$TEMPLATES_DIR/$file" "$file"
+    done
+}
 
-# Initialise shadcn/ui (Radix components, Nova preset)
-pnpx shadcn@latest init --template vite --base radix --preset nova -y
+configure_tooling() {
+    rm -f eslint.config.js
+    pnpx @biomejs/biome init
+    copy_templates
+    echo '@import "tailwindcss";' > src/index.css
+    pnpx shadcn@latest init --template vite --base radix --preset nova -y
+}
 
-# Copy reference docs
-mkdir -p docs
-cp "$STARTER_DIR/tech-spec.md" docs/
-cp "$STARTER_DIR/stack.md" docs/
+copy_docs() {
+    mkdir -p docs
+    for file in "${DOC_FILES[@]}"; do
+        cp "$STARTER_DIR/$file" "docs/$file"
+    done
+}
 
-echo ""
+scaffold_vite_app
+install_dependencies
+configure_tooling
+copy_docs
+
 echo "Done! Next steps:"
 echo "  cd $APP_PATH"
 echo "  cp .env.example .env  # add your keys"
