@@ -58,7 +58,7 @@ copy_templates() {
 
 configure_tooling() {
     rm -f eslint.config.js
-    pnpx @biomejs/biome init
+    cp "$STARTER_DIR/biome.json" biome.json
     copy_templates
     echo '@import "tailwindcss";' > src/index.css
     pnpx shadcn@latest init --template vite --base radix --preset nova -y
