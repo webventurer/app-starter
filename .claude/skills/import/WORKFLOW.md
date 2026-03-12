@@ -9,9 +9,9 @@
 | Step | Action | Goal |
 |:-----|:-------|:-----|
 | 1 | **Add remote** | Connect the upstream repo |
-| 2 | **List commits** | See the full history to replay |
-| 3 | **Replay loop** | Walk each commit: apply or skip |
-| 4 | **Verify** | Confirm the import is complete |
+| 2 | **Build replay checklist** | Write every commit to `references/REPLAY-CHECKLIST.md` |
+| 3 | **Replay loop** | Walk each commit: apply, skip, or defer — update checklist after each |
+| 4 | **Verify** | Confirm every checklist row has a status |
 | 5 | **Domain map** | Holistic summary of both repos |
 
 ---
@@ -51,7 +51,7 @@ git fetch upstream
 
 ---
 
-## Step 2: List the commits
+## Step 2: Build the replay checklist
 
 Get the full commit history in chronological order:
 
@@ -59,18 +59,33 @@ Get the full commit history in chronological order:
 git log upstream/main --oneline --reverse
 ```
 
-This gives you the replay queue. If the user specifies a branch other than `main`, use that instead.
+If the user specifies a branch other than `main`, use that instead.
 
-**If resuming a partial import**, find where you left off:
+### Write the checklist to a file
 
-```bash
-git log --oneline -1  # your last commit
-git log upstream/main --oneline --reverse  # find the matching upstream commit, continue from the next one
+<mark>**Create `references/REPLAY-CHECKLIST.md` with every upstream commit as a numbered checklist item.**</mark> This is the source of truth for progress — not your memory, not the conversation context.
+
+```markdown
+# Replay checklist
+
+| # | Hash | Message | Status |
+|:--|:-----|:--------|:-------|
+| 1 | abc1234 | Initial scaffold | |
+| 2 | def5678 | Add user model | |
+| 3 | ghi9012 | Add login page | |
 ```
+
+Status values: `skipped`, `applied`, `deferred`
+
+**Update this file after processing each commit.** This ensures progress survives context compression and session boundaries.
+
+**If resuming a partial import**, read `references/REPLAY-CHECKLIST.md` to find the first row without a status — that's where you continue.
 
 ---
 
 ## Step 3: Replay loop
+
+<mark>**Do not stop until every row in the replay checklist has a status.** If context is getting long, tell the user which commit number you're on and suggest continuing in a new session.</mark>
 
 For each upstream commit, in order:
 
@@ -110,12 +125,16 @@ Adapt the upstream commit to the target stack:
 
 ### 3d. Commit
 
-<mark>**Always use the `/commit` skill — never raw git commit.**</mark> The skill enforces the four-pass methodology and ensures well-formatted, atomic commits.
+<mark>**Invoke `/commit` using the Skill tool — never use raw `git commit` or `.claude/hooks/do_commit.sh` directly.**</mark> The `/commit` skill enforces the four-pass methodology and ensures well-formatted, atomic commits.
 
-- Reference the upstream commit in the body if helpful
+- Reference the upstream commit hash in the body
 - The commit should make sense on its own — someone reading your history shouldn't need to see the upstream repo
 
-### 3e. Next commit
+### 3e. Update the checklist
+
+Update the row in `references/REPLAY-CHECKLIST.md` with the status (`applied`, `skipped`, or `deferred`).
+
+### 3f. Next commit
 
 Move to the next upstream commit and repeat from 3a.
 
@@ -123,8 +142,9 @@ Move to the next upstream commit and repeat from 3a.
 
 ## Step 4: Verify
 
-After replaying all commits (or reaching the stopping point):
+<mark>**Read `references/REPLAY-CHECKLIST.md` — every row must have a status.**</mark> If any row is blank, go back to Step 3.
 
+- [ ] Every checklist row has a status (`applied`, `skipped`, or `deferred`)
 - [ ] All relevant upstream features are present in the target
 - [ ] No source-stack idioms leaked in (Express patterns, wrong imports, etc.)
 - [ ] App builds and runs
@@ -173,5 +193,5 @@ This is the safety net. The commit-by-commit replay can miss things that were sp
 To continue a previous import session:
 
 1. `git fetch upstream` to get any new commits
-2. Compare your latest commit with the upstream log to find where you left off
-3. Continue the replay loop from the next upstream commit
+2. Read `references/REPLAY-CHECKLIST.md` — find the first row without a status
+3. Continue the replay loop from that commit
