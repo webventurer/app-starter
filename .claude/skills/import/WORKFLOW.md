@@ -113,6 +113,8 @@ while checklist has rows without a status:
 
 **Batch skips:** If the next several commits are all clearly skippable (scaffolding, config, dependency bumps), you may skip them in a batch — update all their statuses at once without spawning subagents.
 
+<mark>**Never batch-skip by prefix.** A `docs:` prefix does not mean a commit is skippable. Project-specific documentation — slash commands, workflows, coding standards, architecture decisions, changelogs — must be imported. Only batch-skip commits where the *content* is genuinely irrelevant (lockfiles, CI pipelines, framework boilerplate). When in doubt, spawn a subagent to evaluate.</mark>
+
 ### Subagent prompt
 
 <mark>**The subagent has no context from the orchestrator's conversation.** Read [references/SUBAGENT-PROMPT.md](references/SUBAGENT-PROMPT.md) and send its contents to the subagent, replacing `<hash>` and `<message>` with the actual commit details. Do not paraphrase or shorten — send the file contents verbatim.</mark>

@@ -52,7 +52,7 @@ This skill applies the same atomicity principle as `/commit`, but at the commit 
 | **Atomic sessions** | One subagent per commit. Fresh context every time. The checklist file carries the state |
 | **Commit-by-commit** | Walk the upstream history in chronological order. Each commit is a decision point: apply or skip |
 | **Adapt, don't copy** | Source code is written for a different stack. Translate the intent of each commit into the target technologies |
-| **Skip what's irrelevant** | Config files, CI pipelines, framework boilerplate from the source stack — skip these entirely |
+| **Skip what's irrelevant** | Config files, CI pipelines, framework boilerplate from the source stack — skip these entirely. But project-specific docs (slash commands, workflows, standards) are NOT irrelevant — import them |
 | **Commit as you go** | After applying each upstream commit, invoke `/commit` in this repo. Keep the history clean and traceable |
 | **Preserve the narrative** | The upstream commit messages tell you *why* each change was made. Carry that reasoning forward into your commits |
 

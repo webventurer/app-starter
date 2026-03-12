@@ -32,6 +32,11 @@ Skip if the commit is:
 - Config for tools the target doesn't use
 - Changes to files that have no equivalent in the target
 
+## Do NOT skip
+
+- **Project-specific documentation** — slash commands, workflows, coding standards, architecture decisions, changelogs, CLAUDE.md updates. These define how the project works and belong in the target repo. Apply them (adapted to the target stack where needed)
+- **Any commit with meaningful content** — evaluate by what the commit contains, not by its `docs:` or `chore:` prefix
+
 ## Technology mapping
 
 When applying, map source concepts to target equivalents:
