@@ -31,6 +31,10 @@ This creates a new `my-app/` directory alongside the starter (`../my-app` relati
 | [`stack.md`](stack.md) | The *why* — explains every technology choice, what we considered, and what we rejected | Before starting a project, to understand the decisions |
 | [`tech-spec.md`](tech-spec.md) | The *how* — project structure, config snippets, environment variables, deployment steps | During development, as a reference guide |
 
+## Why React Query is a default
+
+TanStack React Query is included from day one because it pays for itself almost immediately. The moment you have two or three API calls, you'd otherwise be hand-rolling `useState` + `useEffect` + `try/catch` for loading and error states in every component. React Query replaces all of that with a single `useQuery` hook and gives you caching, deduplication, and background refetching for free. Since this starter already has a real backend (Hono + Drizzle + Neon), every app will be fetching data from the start — React Query means you never write the boilerplate.
+
 ## After install
 
 1. Create a `.env` file (see [tech-spec.md](tech-spec.md) for the full list of variables)
