@@ -16,7 +16,7 @@ LINKED_PATHS=(.app-starter)
 
 link() {
   local src="$1" dest="$2"
-  [ -L "$dest" ] || [ -e "$dest" ] && rm -f "$dest"
+  if [ -L "$dest" ] || [ -e "$dest" ]; then rm -f "$dest"; fi
   mkdir -p "$(dirname "$dest")"
   ln -s "$src" "$dest"
   echo "  $(basename "$dest")"
@@ -28,7 +28,7 @@ is_codefu_skill() {
 
 clean_stale_links() {
   for symlink in "$PROJECT_DIR/.app-starter" "$PROJECT_DIR"/.claude/skills/* "$PROJECT_DIR"/docs/*; do
-    [ -L "$symlink" ] && readlink "$symlink" | grep -q "$STARTER_DIR" && rm -f "$symlink"
+    if [ -L "$symlink" ] && readlink "$symlink" | grep -q "$STARTER_DIR"; then rm -f "$symlink"; fi
   done
 }
 
