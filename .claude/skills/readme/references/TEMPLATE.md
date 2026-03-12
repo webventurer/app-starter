@@ -25,6 +25,14 @@ scripts/setup.sh
 direnv allow
 ```
 
+### Claude Code skills
+
+| Skill | What it does |
+|:------|:-------------|
+| `/import` | Replay an upstream repo commit-by-commit, adapting to this stack |
+| `/readme` | Generate or update this README from CLAUDE.md and package.json |
+| `/update-tech` | Record technology changes made since the last run |
+
 ## Commands
 
 <!-- Pull from CLAUDE.md Commands section -->
