@@ -72,11 +72,14 @@ link_docs() {
     done
 }
 
+STARTER_SKILLS=(import readme update-tech)
+
 link_starter() {
     ln -s "$STARTER_DIR" "$APP_PATH/.app-starter"
     mkdir -p "$APP_PATH/.claude/skills"
-    ln -s "$STARTER_DIR/.claude/skills/import" "$APP_PATH/.claude/skills/import"
-    ln -s "$STARTER_DIR/.claude/skills/readme" "$APP_PATH/.claude/skills/readme"
+    for skill in "${STARTER_SKILLS[@]}"; do
+        ln -s "$STARTER_DIR/.claude/skills/$skill" "$APP_PATH/.claude/skills/$skill"
+    done
 }
 
 init_git() {
