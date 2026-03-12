@@ -17,7 +17,7 @@ Walk every upstream commit, adapt what belongs to the target stack, skip what do
 
 ## When NOT to use
 
-- Building from scratch with no source repo — use `/create` instead
+- Building from scratch with no source repo
 - The source repo has no meaningful commit history (single squashed commit)
 
 ---
@@ -61,9 +61,3 @@ This skill applies the same atomicity principle as `/commit`, but at the commit 
 ## Execution
 
 <mark>**Read and follow every step in [WORKFLOW.md](WORKFLOW.md).**</mark>
-
----
-
-## The governing principle
-
-> Walk the upstream history, carry forward the intent, adapt to the target stack, skip what doesn't belong.

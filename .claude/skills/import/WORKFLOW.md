@@ -2,6 +2,8 @@
 
 <mark>**Follow these steps in order.**</mark>
 
+**Resuming?** If `references/REPLAY-CHECKLIST.md` already exists, run `git fetch upstream` and skip to Step 3.
+
 ---
 
 ## Execution sequence
@@ -17,6 +19,14 @@
 ---
 
 ## Step 1: Pre-flight
+
+Check that codefu is available (needed for cross-repo scan in Step 5b):
+
+```bash
+python -m codefu.codetidy.compare_repos --help
+```
+
+If this fails, tell the user: "codefu is not installed. Clone it and add it to this project: `add-codefu codefu https://github.com/webventurer/codefu`" — then stop.
 
 Confirm the target app exists and runs:
 
@@ -54,7 +64,7 @@ git fetch upstream
 Get the full commit history in chronological order:
 
 ```bash
-git log upstream/main --oneline --reverse
+git log upstream/main --oneline --reverse --no-merges
 ```
 
 If the user specifies a branch other than `main`, use that instead.
@@ -95,7 +105,8 @@ while checklist has rows without a status:
     2. Find the first row without a status
     3. Spawn a subagent (Agent tool) to process that commit
     4. When the subagent returns, verify the checklist was updated
-    5. Report progress to the user (commit #, message, status, how many remain)
+    5. If status is "applied", run git log -1 --oneline to confirm a new commit exists
+    6. Report progress to the user (commit #, message, status, how many remain)
     6. Continue to the next commit
 ```
 
@@ -110,7 +121,7 @@ Process upstream commit <hash> for the import into an app-starter project.
 
 Read these files first:
 - references/REPLAY-CHECKLIST.md — import progress so far
-- docs/tech-spec.md and docs/stack.md — target stack details
+- docs/tech-spec.md and docs/stack.md — target stack details (if they exist)
 
 Your commit: <hash> — <message>
 
@@ -157,11 +168,13 @@ When applying, map source concepts to target equivalents:
 
 If pnpm build fails after applying:
 1. Try to fix the build error (missing import, type issue)
-2. If non-trivial, revert with git checkout .
+2. If non-trivial, revert with git restore --staged --worktree .
 3. Mark the commit as deferred in the checklist
 ```
 
 The subagent handles everything — read, decide, apply, commit, update checklist — then returns to the orchestrator.
+
+**If the subagent cannot invoke `/commit`** (Skill tool unavailable in subagent context), the orchestrator should commit after the subagent returns, using `/commit` itself.
 
 ---
 
@@ -172,9 +185,10 @@ The subagent handles everything — read, decide, apply, commit, update checklis
 - [ ] Every checklist row has a status (`applied`, `skipped`, or `deferred`)
 - [ ] All relevant upstream features are present in the target
 - [ ] No source-stack idioms leaked in (Express patterns, wrong imports, etc.)
-- [ ] App builds and runs
+- [ ] App builds and runs (`pnpm build`)
 - [ ] Skipped commits were genuinely irrelevant
 - [ ] Commit history tells a coherent story
+- [ ] Deferred commits reviewed — apply now or permanently skip with a reason
 
 ---
 
@@ -194,12 +208,21 @@ This document is for future you — when you need to understand the relationship
 
 ### 5b. Cross-repo scan
 
-After writing the domain map, scan both repos to verify nothing was missed:
+After writing the domain map, run `compare_repos` to verify nothing was missed:
 
-1. **List the upstream repo's current files** — `git ls-tree -r --name-only upstream/main`
-2. **List the target repo's files** — `ls -R` or `git ls-files`
-3. **Compare** — for every meaningful upstream file (not config/boilerplate), confirm it has a target equivalent or was deliberately skipped
-4. **Update the domain map** if the scan reveals gaps — features that were in the upstream but didn't come through during the replay
+If the upstream repo isn't available as a local directory, clone it first:
+
+```bash
+git clone <upstream-url> /tmp/upstream-checkout
+```
+
+Then run the comparison:
+
+```bash
+python -m codefu.codetidy.compare_repos /tmp/upstream-checkout .
+```
+
+Review the report — pay attention to `source_only` files (upstream files with no target equivalent). Update the domain map if the scan reveals gaps.
 
 This is the safety net. The commit-by-commit replay can miss things that were spread across multiple commits or that don't show up as obvious feature additions.
 
@@ -209,14 +232,4 @@ This is the safety net. The commit-by-commit replay can miss things that were sp
 
 - All upstream commits have been replayed or skipped
 - The user says to stop
-- A commit requires infrastructure not yet available (note as future work, skip, continue)
-
----
-
-## Resuming
-
-To continue a previous import session:
-
-1. `git fetch upstream` to get any new commits
-2. Read `references/REPLAY-CHECKLIST.md` — find the first row without a status
-3. Continue the replay loop from that commit
+- A commit requires infrastructure not yet available (mark as `deferred`, continue)
