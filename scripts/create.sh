@@ -72,10 +72,15 @@ copy_docs() {
     done
 }
 
+link_starter() {
+    ln -s "$STARTER_DIR" "$APP_PATH/.app-starter"
+}
+
 scaffold_vite_app
 install_dependencies
 configure_tooling
 copy_docs
+link_starter
 
 echo "Done! Next steps:"
 echo "  cd $APP_PATH"
