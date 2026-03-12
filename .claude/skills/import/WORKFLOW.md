@@ -8,25 +8,23 @@
 
 | Step | Action | Goal |
 |:-----|:-------|:-----|
-| 1 | **Add remote** | Connect the upstream repo |
+| 1 | **Pre-flight** | Confirm target app exists, add upstream remote |
 | 2 | **Build replay checklist** | Write every commit to `references/REPLAY-CHECKLIST.md` |
-| 3 | **Replay loop** | Walk each commit: apply, skip, or defer — update checklist after each |
+| 3 | **Replay loop** | Orchestrator spawns one subagent per commit — fresh context every time |
 | 4 | **Verify** | Confirm every checklist row has a status |
 | 5 | **Domain map** | Holistic summary of both repos |
 
 ---
 
-## Before you start
+## Step 1: Pre-flight
 
-Read these before executing:
+Confirm the target app exists and runs:
 
-- [SKILL.md](SKILL.md) — principles, technology mapping, what to skip
-- [tech-spec.md](../../../tech-spec.md) — target stack and project structure
-- [stack.md](../../../stack.md) — technology choices and rationale
+```bash
+pnpm build
+```
 
----
-
-## Step 1: Add the upstream remote
+If this fails, fix it before importing anything. You need a working baseline.
 
 **Ask the user for the upstream repo URL** if not provided as an argument to `/import`.
 
@@ -63,7 +61,11 @@ If the user specifies a branch other than `main`, use that instead.
 
 ### Write the checklist to a file
 
-<mark>**Create `references/REPLAY-CHECKLIST.md` with every upstream commit as a numbered checklist item.**</mark> This is the source of truth for progress — not your memory, not the conversation context.
+<mark>**Create `references/REPLAY-CHECKLIST.md` with every upstream commit as a numbered row.**</mark> This is the source of truth for progress — not your memory, not the conversation context.
+
+```bash
+mkdir -p references
+```
 
 ```markdown
 # Replay checklist
@@ -79,64 +81,87 @@ Status values: `skipped`, `applied`, `deferred`
 
 **Update this file after processing each commit.** This ensures progress survives context compression and session boundaries.
 
-**If resuming a partial import**, read `references/REPLAY-CHECKLIST.md` to find the first row without a status — that's where you continue.
-
 ---
 
 ## Step 3: Replay loop
 
-<mark>**Do not stop until every row in the replay checklist has a status.** If context is getting long, tell the user which commit number you're on and suggest continuing in a new session.</mark>
+<mark>**You are the orchestrator.** Do not process commits yourself — spawn a subagent for each one using the Agent tool. Each subagent gets fresh context, so quality stays high across the entire import.</mark>
 
-For each upstream commit, in order:
+### Orchestrator loop
 
-### 3a. Read the commit
-
-```bash
-git show <commit-hash>
+```
+while checklist has rows without a status:
+    1. Read references/REPLAY-CHECKLIST.md
+    2. Find the first row without a status
+    3. Spawn a subagent (Agent tool) to process that commit
+    4. When the subagent returns, verify the checklist was updated
+    5. Report progress to the user (commit #, message, status, how many remain)
+    6. Continue to the next commit
 ```
 
-Understand: what changed, and why (from the commit message).
+**Batch skips:** If the next several commits are all clearly skippable (scaffolding, config, dependency bumps), you may skip them in a batch — update all their statuses at once without spawning subagents.
 
-### 3b. Decide: apply or skip
+### Subagent prompt template
 
-**Skip** if the commit is:
-- Scaffolding or boilerplate (see [What to skip](SKILL.md#what-to-skip))
+<mark>**The subagent has no context from the orchestrator's conversation.** The prompt must be fully self-contained — include all skip criteria, technology mappings, and conventions inline.</mark>
+
+```
+Process upstream commit <hash> for the import into an app-starter project.
+
+Read these files first:
+- references/REPLAY-CHECKLIST.md — import progress so far
+- docs/tech-spec.md and docs/stack.md — target stack details
+
+Your commit: <hash> — <message>
+
+## Steps
+
+1. Run: git show <hash>
+2. Decide: apply or skip
+3. If applying: adapt to target stack, verify build with pnpm build
+4. Invoke /commit using the Skill tool to commit (reference upstream hash in body)
+5. Update references/REPLAY-CHECKLIST.md with the status (applied, skipped, or deferred)
+
+## Skip criteria
+
+Skip if the commit is:
+- Initial scaffolding (create-react-app, vite init, etc.)
+- Package manager config (package.json, lockfiles, .npmrc)
+- CI/CD pipelines (.github/workflows/, Dockerfiles)
+- Linter/formatter config (.eslintrc, .prettierrc — target uses Biome)
+- Framework boilerplate that only exists because the source framework requires it
+- Dependency bumps with no code changes
 - Config for tools the target doesn't use
-- Dependency changes with no code impact
 - Changes to files that have no equivalent in the target
 
-**Apply** if the commit contains:
-- Data model changes → adapt to Drizzle schema
-- API route changes → adapt to Hono routes
-- UI component changes → adapt to React + shadcn/ui + Tailwind
-- Business logic → translate the intent, not the syntax
-- Asset additions (images, fonts) → copy directly if needed
+## Technology mapping
 
-When skipping, note it briefly and move on. Don't dwell.
+When applying, map source concepts to target equivalents:
+- Database models (ActiveRecord, Sequelize, Prisma) → Drizzle schema in server/db/schema.ts
+- API routes (Express, Rails controllers, Flask) → Hono routes in server/routes/
+- Views/templates (ERB, EJS, Jinja, jQuery) → React components in src/features/
+- Auth (Devise, Passport, custom) → Clerk (drop custom auth entirely)
+- Tests (RSpec, Jest, Mocha) → Vitest + Testing Library
+- CSS frameworks (Bootstrap, Material UI) → Tailwind + shadcn/ui
+- Animation (framer-motion) → Motion (motion/react)
 
-### 3c. Apply the change
+## Conventions
 
-Adapt the upstream commit to the target stack:
+- Feature-based directory structure (src/features/<name>/)
+- React Query for data fetching
+- Hono for API routes with Zod validation
+- The commit should make sense on its own — someone reading the history
+  shouldn't need to see the upstream repo
 
-1. **Read the diff** — understand what the upstream commit does
-2. **Implement the equivalent** in target technologies (see [Technology mapping](SKILL.md#technology-mapping))
-3. **Follow target conventions** — feature-based directories, React Query for data fetching, Hono for API routes
-4. **Test** — does the app still build? Does the feature work?
+## Build failure recovery
 
-### 3d. Commit
+If pnpm build fails after applying:
+1. Try to fix the build error (missing import, type issue)
+2. If non-trivial, revert with git checkout .
+3. Mark the commit as deferred in the checklist
+```
 
-<mark>**Invoke `/commit` using the Skill tool — never use raw `git commit` or `.claude/hooks/do_commit.sh` directly.**</mark> The `/commit` skill enforces the four-pass methodology and ensures well-formatted, atomic commits.
-
-- Reference the upstream commit hash in the body
-- The commit should make sense on its own — someone reading your history shouldn't need to see the upstream repo
-
-### 3e. Update the checklist
-
-Update the row in `references/REPLAY-CHECKLIST.md` with the status (`applied`, `skipped`, or `deferred`).
-
-### 3f. Next commit
-
-Move to the next upstream commit and repeat from 3a.
+The subagent handles everything — read, decide, apply, commit, update checklist — then returns to the orchestrator.
 
 ---
 
