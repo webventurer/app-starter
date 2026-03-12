@@ -19,7 +19,7 @@ TEMPLATE_FILES=(
 DOC_FILES=(tech-spec.md stack.md)
 
 SHADCN_COMPONENTS=(
-    card table badge tabs tooltip
+    card table badge tabs
     separator skeleton dialog drawer input
 )
 
