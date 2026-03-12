@@ -18,6 +18,11 @@ TEMPLATE_FILES=(
 
 DOC_FILES=(tech-spec.md stack.md)
 
+SHADCN_COMPONENTS=(
+    button card table badge tabs tooltip
+    separator skeleton dialog drawer input
+)
+
 resolve_absolute_path() {
     case "$1" in
         /*) echo "$1" ;;
@@ -57,6 +62,7 @@ configure_tooling() {
     copy_templates
     echo '@import "tailwindcss";' > src/index.css
     pnpx shadcn@latest init --template vite --base radix --preset nova -y
+    pnpx shadcn@latest add -y "${SHADCN_COMPONENTS[@]}"
 }
 
 copy_docs() {
