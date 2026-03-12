@@ -42,10 +42,6 @@ This creates a new `my-app/` directory alongside the starter (`../my-app` relati
 These are not in `package.json` — add them only when needed:
 
 ```bash
-# Animation — when CSS transitions aren't enough
-pnpm add motion          # interactive: mount/unmount, layout, gestures
-pnpm add gsap            # cinematic: timelines, scroll-driven, SVG morphing
-
 # State management — when useState outgrows local state
 pnpm add zustand
 ```
