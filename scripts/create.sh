@@ -76,6 +76,7 @@ link_starter() {
     ln -s "$STARTER_DIR" "$APP_PATH/.app-starter"
     mkdir -p "$APP_PATH/.claude/skills"
     ln -s "$STARTER_DIR/.claude/skills/import" "$APP_PATH/.claude/skills/import"
+    ln -s "$STARTER_DIR/.claude/skills/readme" "$APP_PATH/.claude/skills/readme"
 }
 
 init_git() {
@@ -95,4 +96,5 @@ init_git
 echo "Done! Next steps:"
 echo "  cd $APP_PATH"
 echo "  cp .env.example .env  # add your keys"
+echo "  /readme               # generate README.md"
 echo "  pnpm dev"
