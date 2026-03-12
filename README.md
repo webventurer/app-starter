@@ -42,6 +42,11 @@ This creates a new `my-app/` directory alongside the starter (`../my-app` relati
 These are not in `package.json` — add them only when needed:
 
 ```bash
+# Typography — polished, branded feel (Vercel's Geist font)
+pnpm add @fontsource-variable/geist
+# then add to src/main.tsx: import "@fontsource-variable/geist";
+# and set in src/index.css: font-family: "Geist Variable", sans-serif;
+
 # State management — when useState outgrows local state
 pnpm add zustand
 ```
