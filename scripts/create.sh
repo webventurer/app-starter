@@ -16,8 +16,6 @@ TEMPLATE_FILES=(
     server/index.ts
 )
 
-DOC_FILES=(tech-spec.md stack.md)
-
 SHADCN_COMPONENTS=(
     card table badge tabs
     separator skeleton dialog drawer input
@@ -65,21 +63,11 @@ configure_tooling() {
     pnpx shadcn@latest add -y --overwrite "${SHADCN_COMPONENTS[@]}"
 }
 
-link_docs() {
-    mkdir -p docs
-    for file in "${DOC_FILES[@]}"; do
-        ln -s "$STARTER_DIR/$file" "docs/$file"
-    done
-}
-
-STARTER_SKILLS=(import readme update-tech)
-
-link_starter() {
-    ln -s "$STARTER_DIR" "$APP_PATH/.app-starter"
-    mkdir -p "$APP_PATH/.claude/skills"
-    for skill in "${STARTER_SKILLS[@]}"; do
-        ln -s "$STARTER_DIR/.claude/skills/$skill" "$APP_PATH/.claude/skills/$skill"
-    done
+setup_links() {
+    mkdir -p "$APP_PATH/scripts"
+    cp "$SCRIPT_DIR/setup.sh" "$APP_PATH/scripts/setup.sh"
+    chmod +x "$APP_PATH/scripts/setup.sh"
+    "$APP_PATH/scripts/setup.sh"
 }
 
 init_git() {
@@ -92,8 +80,7 @@ init_git() {
 scaffold_vite_app
 install_dependencies
 configure_tooling
-link_docs
-link_starter
+setup_links
 init_git
 
 echo "Done! Next steps:"

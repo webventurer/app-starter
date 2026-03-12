@@ -17,10 +17,11 @@ This project uses [codefu](https://github.com/webventurer/codefu) for AI-assiste
 
 ```bash
 gh repo clone webventurer/codefu
-add-codefu.sh  # if not there already
 gh repo clone webventurer/app-starter
 gh repo clone webventurer/{repo-name}
 cd {repo-name}
+add-codefu.sh
+scripts/setup.sh
 ```
 
 ## Commands
