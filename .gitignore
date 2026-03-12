@@ -12,3 +12,6 @@ codefu
 
 # codefu symlink
 .semgrep
+
+# update-tech cursor
+.tech-commit-ref
