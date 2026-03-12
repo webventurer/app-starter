@@ -62,25 +62,35 @@ configure_tooling() {
     copy_templates
     echo '@import "tailwindcss";' > src/index.css
     pnpx shadcn@latest init --template vite --base radix --preset nova -y
-    pnpx shadcn@latest add -y "${SHADCN_COMPONENTS[@]}"
+    pnpx shadcn@latest add -y --overwrite "${SHADCN_COMPONENTS[@]}"
 }
 
-copy_docs() {
+link_docs() {
     mkdir -p docs
     for file in "${DOC_FILES[@]}"; do
-        cp "$STARTER_DIR/$file" "docs/$file"
+        ln -s "$STARTER_DIR/$file" "docs/$file"
     done
 }
 
 link_starter() {
     ln -s "$STARTER_DIR" "$APP_PATH/.app-starter"
+    mkdir -p "$APP_PATH/.claude/skills"
+    ln -s "$STARTER_DIR/.claude/skills/import" "$APP_PATH/.claude/skills/import"
+}
+
+init_git() {
+    rm -rf .git
+    git init
+    git add -A
+    git commit -m "feat: Initial app from app-starter"
 }
 
 scaffold_vite_app
 install_dependencies
 configure_tooling
-copy_docs
+link_docs
 link_starter
+init_git
 
 echo "Done! Next steps:"
 echo "  cd $APP_PATH"
