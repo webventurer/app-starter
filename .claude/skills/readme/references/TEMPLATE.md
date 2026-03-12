@@ -22,6 +22,7 @@ gh repo clone webventurer/{repo-name}
 cd {repo-name}
 add-codefu.sh
 scripts/setup.sh
+direnv allow
 ```
 
 ## Commands
