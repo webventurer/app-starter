@@ -22,6 +22,17 @@ gh repo clone webventurer/app-starter
 
 This creates a new `my-app/` directory alongside the starter (`../my-app` relative to this repo) and scaffolds a Vite + React + TypeScript project, installs all dependencies, initialises shadcn/ui (Radix + Nova), sets up Biome, and copies the reference docs into it.
 
+## Claude Code setup
+
+This project uses [codefu](https://github.com/webventurer/codefu) for AI-assisted development skills and commands. Add if not already cloned:
+
+```bash
+gh repo clone webventurer/codefu
+add-codefu.sh  # if not there already
+gh repo clone webventurer/app-starter
+cd app-starter
+```
+
 ## What's in this repo
 
 | File | What it is | When to read it |
