@@ -15,6 +15,7 @@
 | 3 | **Replay loop** | Orchestrator spawns one subagent per commit — fresh context every time |
 | 4 | **Verify** | Confirm every checklist row has a status |
 | 5 | **Domain map** | Holistic summary of both repos |
+| 6 | **Cross-repo scan** | Verify nothing was missed with `compare_repos` |
 
 ---
 
@@ -150,9 +151,11 @@ The domain map should cover:
 
 This document is for future you — when you need to understand the relationship between the two repos or resume work later.
 
-### 5b. Cross-repo scan
+---
 
-After writing the domain map, run `compare_repos` to verify nothing was missed:
+## Step 6: Cross-repo scan
+
+After writing the domain map, run `compare_repos` to verify nothing was missed.
 
 If the upstream repo isn't available as a local directory, clone it first:
 
