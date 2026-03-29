@@ -102,9 +102,32 @@ server/
 
 ## Configuration
 
-### Tailwind (`tailwind.config.ts`)
+### Vite (`vite.config.ts`)
 
-Use Tailwind v4 with the Vite plugin. Dark mode via class strategy.
+```typescript
+import path from "node:path";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+});
+```
+
+### Tailwind
+
+Tailwind v4 uses the Vite plugin — no `tailwind.config.ts`. Configuration is CSS-based:
+
+```css
+/* src/index.css */
+@import "tailwindcss";
+```
 
 ### Drizzle (`drizzle.config.ts`)
 
