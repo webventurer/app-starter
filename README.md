@@ -50,7 +50,8 @@ TanStack React Query is included from day one because it pays for itself almost 
 
 1. Create a `.env` file (see [tech-spec.md](tech-spec.md) for the full list of variables)
 2. Set up your project structure (see [tech-spec.md](tech-spec.md) for the directory layout)
-3. Add config files — `drizzle.config.ts`, `vitest.config.ts`, `src/lib/query-client.ts` (snippets in [tech-spec.md](tech-spec.md))
+
+Config files (`vite.config.ts`, `drizzle.config.ts`, `vitest.config.ts`, `src/lib/query-client.ts`, `src/lib/db.ts`, `server/index.ts`) are copied automatically by the create script.
 
 ## Optional dependencies
 

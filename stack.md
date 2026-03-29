@@ -22,7 +22,7 @@ Scaffold with `pnpm create vite@latest` and add pieces as needed.
 - **Icons:** Lucide React
 - **Linting + formatting:** Biome — replaces ESLint + Prettier in one tool, faster, simpler config
 - **Testing:** Vitest + Testing Library + jsdom
-- **Dark mode:** Tailwind class-based dark mode + a small custom hook
+- **Dark mode:** Tailwind v4 dark mode (media query by default, `@custom-variant` for class-based)
 
 **Backend & services:**
 
@@ -62,8 +62,6 @@ Start with CSS. Reach for a library only when CSS can't do the job. Each level h
 | **Cinematic** | **GSAP** — imperative timeline control for complex sequences | Scroll-driven storytelling, SVG morphing, coordinated multi-element timelines, Canvas/WebGL |
 
 <mark>**Don't install Motion for a hover effect. Don't install GSAP for a modal transition.** Match the tool to the complexity.</mark>
-
-See [Motion stack doc](../../stack/research/motion.md) and [GSAP vs Motion comparison](../../stack/research/gsap-vs-motion.md) for full details.
 
 ### UI library
 
