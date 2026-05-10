@@ -10,6 +10,11 @@ PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
 PARENT_DIR="$(cd "$PROJECT_DIR/.." && pwd)"
 STARTER_DIR="$PARENT_DIR/app-starter"
 GITIGNORE="$PROJECT_DIR/.gitignore"
+
+if [ "$PROJECT_DIR" = "$STARTER_DIR" ]; then
+  echo "Refusing to run setup.sh on the starter itself — run it from a scaffolded project." >&2
+  exit 1
+fi
 MARKER="# app-starter symlinks (recreated by scripts/setup.sh)"
 LINKED_PATHS=(.app-starter)
 
