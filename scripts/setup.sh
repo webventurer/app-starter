@@ -31,6 +31,10 @@ is_native() {
   [ ! -L "$path" ]
 }
 
+is_owned() {
+  git -C "$STARTER_DIR" ls-files --error-unmatch "$1" >/dev/null 2>&1
+}
+
 clean_stale_links() {
   for symlink in "$PROJECT_DIR/.app-starter" "$PROJECT_DIR"/.claude/skills/* "$PROJECT_DIR"/docs/*; do
     if [ -L "$symlink" ] && readlink "$symlink" | grep -q "$STARTER_DIR"; then rm -f "$symlink"; fi
@@ -40,6 +44,7 @@ clean_stale_links() {
 link_skills() {
   for skill_dir in "$STARTER_DIR"/.claude/skills/*/; do
     is_native "$skill_dir" || continue
+    is_owned "$skill_dir" || continue
     local skill="$(basename "$skill_dir")"
     link "$skill_dir" "$PROJECT_DIR/.claude/skills/$skill"
     LINKED_PATHS+=(".claude/skills/$skill")
@@ -49,6 +54,7 @@ link_skills() {
 link_docs() {
   for doc in "$STARTER_DIR"/*.md; do
     is_native "$doc" || continue
+    is_owned "$doc" || continue
     local name="$(basename "$doc")"
     case "$name" in README.md|CLAUDE.md) continue ;; esac
     link "$doc" "$PROJECT_DIR/docs/$name"
