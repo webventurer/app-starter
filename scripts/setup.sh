@@ -9,7 +9,6 @@ PROJECT_DIR="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
 PROJECT_DIR="$(cd "$PROJECT_DIR" && pwd)"
 PARENT_DIR="$(cd "$PROJECT_DIR/.." && pwd)"
 STARTER_DIR="$PARENT_DIR/app-starter"
-CODEFU_DIR="$PARENT_DIR/codefu"
 GITIGNORE="$PROJECT_DIR/.gitignore"
 MARKER="# app-starter symlinks (recreated by scripts/setup.sh)"
 LINKED_PATHS=(.app-starter)
@@ -22,8 +21,9 @@ link() {
   echo "  $(basename "$dest")"
 }
 
-is_codefu_skill() {
-  [ -d "$CODEFU_DIR/.claude/skills/$1" ]
+is_native() {
+  local path="${1%/}"
+  [ ! -L "$path" ]
 }
 
 clean_stale_links() {
@@ -34,16 +34,16 @@ clean_stale_links() {
 
 link_skills() {
   for skill_dir in "$STARTER_DIR"/.claude/skills/*/; do
+    is_native "$skill_dir" || continue
     local skill="$(basename "$skill_dir")"
-    if ! is_codefu_skill "$skill"; then
-      link "$skill_dir" "$PROJECT_DIR/.claude/skills/$skill"
-      LINKED_PATHS+=(".claude/skills/$skill")
-    fi
+    link "$skill_dir" "$PROJECT_DIR/.claude/skills/$skill"
+    LINKED_PATHS+=(".claude/skills/$skill")
   done
 }
 
 link_docs() {
   for doc in "$STARTER_DIR"/*.md; do
+    is_native "$doc" || continue
     local name="$(basename "$doc")"
     case "$name" in README.md|CLAUDE.md) continue ;; esac
     link "$doc" "$PROJECT_DIR/docs/$name"
@@ -52,8 +52,8 @@ link_docs() {
 }
 
 update_gitignore() {
-  [ -f "$GITIGNORE" ] || return
-  grep -q "$MARKER" "$GITIGNORE" || return
+  [ -f "$GITIGNORE" ] || return 0
+  grep -q "$MARKER" "$GITIGNORE" || return 0
   {
     local skip=false
     while IFS= read -r line; do
