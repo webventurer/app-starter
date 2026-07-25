@@ -63,6 +63,11 @@ configure_tooling() {
     pnpx shadcn@latest add -y --overwrite "${SHADCN_COMPONENTS[@]}"
 }
 
+install_clis() {
+    pnpm add -g neonctl @railway/cli 2>/dev/null \
+        || echo "Note: install neonctl + @railway/cli manually (pnpm add -g). Clerk runs via npx."
+}
+
 setup_links() {
     mkdir -p "$APP_PATH/scripts"
     cp "$SCRIPT_DIR/setup.sh" "$APP_PATH/scripts/setup.sh"
@@ -80,6 +85,7 @@ init_git() {
 scaffold_vite_app
 install_dependencies
 configure_tooling
+install_clis
 setup_links
 init_git
 
@@ -87,6 +93,11 @@ echo "Done! Next steps:"
 echo "  cd $APP_PATH"
 echo "  cp .env.example .env  # add your keys"
 echo "  pnpm dev"
+echo ""
+echo "Provision services from the CLI (see docs/tech-spec.md):"
+echo "  neonctl projects create --name $(basename "$APP_PATH")  # database"
+echo "  npx clerk init                                          # auth"
+echo "  railway init && railway up                              # deploy"
 echo ""
 echo "Claude Code skills:"
 echo "  /import      # replay an upstream repo into this stack"
