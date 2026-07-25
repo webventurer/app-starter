@@ -14,7 +14,7 @@ Scaffold with `pnpm create vite@latest` and add pieces as needed.
 - **Build tool:** Vite
 - **Styling:** Tailwind CSS + shadcn/ui (Radix primitives)
 - **Animation:** CSS transitions first, then Motion, then GSAP — see [animation choice](#animation) below
-- **Routing:** React Router v6 — see [routing choice](#routing) below
+- **Routing:** React Router v7 — see [routing choice](#routing) below
 - **Data fetching + server state:** TanStack React Query — handles caching, background refetching, loading/error states
 - **Client state:** React `useState` / `useReducer` for UI state (modals, toggles, form inputs) — add Zustand if it outgrows local state
 - **Charts:** Recharts
@@ -53,15 +53,15 @@ When you weigh an alternative for any of these layers, **a strong CLI is a first
 
 Vite has no built-in router, so you pick one. Two real options:
 
-| | React Router v6 | TanStack Router |
+| | React Router v7 | TanStack Router |
 |:--|:-----------------|:----------------|
 | **Maturity** | Established, massive ecosystem | Newer, smaller community |
 | **Docs/examples** | Abundant | Growing but thinner |
-| **Type safety** | Partial — paths are strings | Full — routes, params, and search params are typed |
+| **Type safety** | Partial — paths and params are strings in the library mode this stack uses; typed routes need framework mode | Full — routes, params, and search params are typed |
 | **React Query integration** | Manual | Built-in — route loaders use React Query directly |
 | **Learning curve** | Lower — most React devs already know it | Higher — new concepts (route trees, search param validation) |
 
-**Our default: React Router v6** — established, massive ecosystem, abundant docs. Most React devs already know it. TanStack Router is a good alternative if you want type-safe routing and built-in React Query integration — it keeps you in the same TanStack ecosystem you're already using for data fetching.
+**Our default: React Router v7** — established, massive ecosystem, abundant docs. Most React devs already know it. TanStack Router is a good alternative if you want type-safe routing and built-in React Query integration — it keeps you in the same TanStack ecosystem you're already using for data fetching.
 
 ### Animation
 
