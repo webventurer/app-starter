@@ -35,6 +35,18 @@ Scaffold with `pnpm create vite@latest` and add pieces as needed.
 - **Payments:** Stripe
 - **Analytics:** PostHog
 
+## CLI-first workflow
+
+Neon, Railway and Clerk each ship a first-class CLI, and that's part of why they're here. Provisioning a database, configuring auth, pushing env vars, and deploying all run from the terminal — so the **whole loop happens inside Claude, with no dashboard clicks**. <mark>The CLI isn't a fallback for the dashboard; it's the primary interface.</mark> See [tech-spec.md](tech-spec.md#provision--deploy-cli-first) for the exact commands.
+
+| Service | CLI | Runs |
+|:--------|:----|:-----|
+| **Neon** | `neonctl` | Create projects, branch per environment, print connection strings |
+| **Railway** | `railway` | Init, push variables, deploy with `railway up` |
+| **Clerk** | `clerk` (via `npx`) | Scaffold auth, configure sign-in, `clerk deploy` to production |
+
+When you weigh an alternative for any of these layers, **a strong CLI is a first-class selection criterion** — it's what keeps the build loop inside the editor.
+
 ## Why these choices
 
 ### Routing

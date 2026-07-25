@@ -64,6 +64,25 @@ pnpx @biomejs/biome init
 pnpm add -D vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
 
+## Install: infrastructure CLIs
+
+Neon, Railway and Clerk are driven from the command line — provisioning, auth config, and deploys all run from the terminal, so the whole loop happens inside Claude with no dashboard clicks. Install once per machine:
+
+```bash
+pnpm add -g neonctl @railway/cli   # Neon + Railway
+# Clerk runs via npx — no install needed
+```
+
+Then authenticate each:
+
+```bash
+neonctl auth        # Neon — opens a browser
+railway login       # Railway — opens a browser
+npx clerk init      # Clerk — links your account (or mints temp dev keys with no account)
+```
+
+Every command takes `--help`; reach for it when a flag isn't obvious.
+
 ## Install: optional (add when needed)
 
 ```bash
@@ -213,7 +232,7 @@ POSTHOG_KEY=               # PostHog project key
 LOOPS_API_KEY=             # Loops.so API key
 ```
 
-Add `.env` to `.gitignore`.
+Add `.env` to `.gitignore`. You don't fill these in by hand: `neonctl connection-string` prints `DATABASE_URL` and `npx clerk init` writes the two `CLERK_*` keys — paste the rest from each service.
 
 ## Scripts (`package.json`)
 
@@ -234,12 +253,45 @@ Add `.env` to `.gitignore`.
 }
 ```
 
-## Deployment (Railway)
+## Provision & deploy (CLI-first)
 
-1. Connect your GitHub repo in Railway
-2. Add a Neon Postgres database (or provision one in Railway)
-3. Set environment variables in Railway dashboard
-4. Railway auto-detects the Vite build and deploys on push
+The whole loop — database, auth, hosting — runs from the terminal. No dashboard clicks.
+
+### 1. Database with Neon
+
+```bash
+neonctl projects create --name my-app
+neonctl connection-string --pooled    # prints DATABASE_URL
+```
+
+Paste the string into `.env` as `DATABASE_URL`, then push the schema:
+
+```bash
+pnpm db:generate && pnpm db:migrate
+```
+
+### 2. Auth with Clerk
+
+```bash
+npx clerk init        # detects the framework, scaffolds Clerk, writes CLERK_* keys to .env
+npx clerk config      # sign-in methods, redirects, session policy
+```
+
+### 3. Hosting on Railway
+
+```bash
+railway init                                          # create the project
+railway variables --set "DATABASE_URL=$DATABASE_URL"  # push env vars (repeat per key)
+railway up                                            # deploy
+```
+
+Railway hosts the app while Neon stays the database. To run an all-Railway stack instead, `railway add --database postgres` provisions Postgres on Railway and sets `DATABASE_URL` for you.
+
+Take it to production with Clerk's guided deploy:
+
+```bash
+npx clerk deploy      # clones the dev instance to production, walks you through DNS + OAuth
+```
 
 ## Coding conventions
 
