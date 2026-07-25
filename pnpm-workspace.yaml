@@ -1,0 +1,10 @@
+allowBuilds:
+  '@clerk/shared': false
+  core-js: false
+  esbuild: true
+  protobufjs: false
+minimumReleaseAgeExclude:
+  - react-hook-form@7.83.0
+  - '@clerk/react@6.12.8'
+  - '@clerk/shared@4.25.8'
+  - '@hookform/resolvers@5.4.2'

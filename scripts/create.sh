@@ -43,6 +43,7 @@ scaffold_vite_app() {
 
 install_dependencies() {
     cp "$STARTER_DIR/package.json" "$APP_PATH/package.json"
+    cp "$STARTER_DIR/pnpm-workspace.yaml" "$APP_PATH/pnpm-workspace.yaml"
     cd "$APP_PATH"
     pnpm install
 }
